@@ -1,6 +1,6 @@
 {
   "name": "sb3-git",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Git-based collaborative development toolchain for Scratch .sb3 projects",
   "type": "module",
   "main": "./dist/index.js",
