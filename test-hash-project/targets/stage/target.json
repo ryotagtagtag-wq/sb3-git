@@ -1,0 +1,10 @@
+{
+  "name": "Stage",
+  "isStage": true,
+  "layerOrder": 0,
+  "variables": {},
+  "lists": {},
+  "broadcasts": {},
+  "volume": 100,
+  "tempo": 60
+}

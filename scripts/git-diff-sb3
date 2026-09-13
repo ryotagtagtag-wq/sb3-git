@@ -1,0 +1,24 @@
+#!/usr/bin/env node
+// Git diff textconv driver for SB3 files
+// Usage: git config diff.sb3.textconv "node scripts/git-diff-sb3"
+import { readFileSync } from 'fs'
+import { importSB3, normalize, assignSemanticIds } from '../dist/index.js'
+
+const filePath = process.argv[2]
+if (!filePath) {
+  console.error('Usage: git-diff-sb3 <file.sb3>')
+  process.exit(1)
+}
+
+try {
+  const buffer = readFileSync(filePath)
+  const sb3Project = await importSB3(buffer)
+  const normalized = normalize(sb3Project)
+  const project = assignSemanticIds(normalized)
+  
+  // Output deterministic JSON for git diff
+  console.log(JSON.stringify(project, null, 2))
+} catch (err) {
+  console.error(`Error processing ${filePath}:`, err)
+  process.exit(1)
+}

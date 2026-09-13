@@ -1,0 +1,4 @@
+# Git attributes for SB3 files
+*.sb3 diff=sb3 merge=sb3
+*.sb3 linguist-language=JSON
+*.sb3 linguist-detectable=true

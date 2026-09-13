@@ -1,0 +1,70 @@
+#!/usr/bin/env node
+// Git merge driver for SB3 files
+// Usage: git config merge.sb3.driver "node scripts/git-merge-sb3 %O %A %B %L %P"
+// %O = original (base), %A = ours (current), %B = theirs (incoming), %L = conflict marker size, %P = path
+import { readFileSync, writeFileSync } from 'fs'
+import { importSB3, normalize, assignSemanticIds, exportSB3, extractAssets } from '../dist/index.js'
+import { threeWayMerge } from '../dist/index.js'
+
+const [, , basePath, oursPath, theirsPath] = process.argv
+
+if (!basePath || !oursPath || !theirsPath) {
+  console.error('Usage: git-merge-sb3 <base.sb3> <ours.sb3> <theirs.sb3>')
+  process.exit(1)
+}
+
+try {
+  // Read all three versions
+  const baseBuffer = readFileSync(basePath)
+  const oursBuffer = readFileSync(oursPath)
+  const theirsBuffer = readFileSync(theirsPath)
+
+  // Import and process
+  const baseSb3Project = await importSB3(baseBuffer)
+  const oursSb3Project = await importSB3(oursBuffer)
+  const theirsSb3Project = await importSB3(theirsBuffer)
+
+  const baseNormalized = normalize(baseSb3Project)
+  const oursNormalized = normalize(oursSb3Project)
+  const theirsNormalized = normalize(theirsSb3Project)
+
+  const baseProject = assignSemanticIds(baseNormalized)
+  const oursProject = assignSemanticIds(oursNormalized)
+  const theirsProject = assignSemanticIds(theirsNormalized)
+
+  // Perform three-way merge
+  const { project: mergedProject, conflicts } = threeWayMerge(
+    baseProject,
+    oursProject,
+    theirsProject
+  )
+
+  // If there are unresolved conflicts, mark them
+  if (conflicts.length > 0) {
+    console.error('Merge conflicts detected:')
+    for (const conflict of conflicts) {
+      console.error(`  ${conflict.path}: ${conflict.reason}`)
+    }
+    // Write ours version with conflict markers for manual resolution
+    writeFileSync(oursPath, oursBuffer)
+    process.exit(1) // Non-zero exit tells git to stop and let user resolve
+  }
+
+  // Extract and merge assets
+  const baseAssets = await extractAssets(baseBuffer)
+  const oursAssets = await extractAssets(oursBuffer)
+  const theirsAssets = await extractAssets(theirsBuffer)
+  
+  const mergedAssets = new Map()
+  for (const [k, v] of baseAssets) mergedAssets.set(k, v)
+  for (const [k, v] of theirsAssets) mergedAssets.set(k, v)
+  for (const [k, v] of oursAssets) mergedAssets.set(k, v)
+
+  // Collapse and write merged result
+  const mergedBuffer = await exportSB3(mergedProject, mergedAssets)
+  writeFileSync(oursPath, mergedBuffer)
+  process.exit(0)
+} catch (err) {
+  console.error('Merge error:', err)
+  process.exit(1)
+}

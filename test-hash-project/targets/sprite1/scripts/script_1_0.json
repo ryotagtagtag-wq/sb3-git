@@ -1,0 +1,39 @@
+{
+  "id": "script_1_0",
+  "parentTarget": "Sprite1",
+  "blocks": [
+    {
+      "id": "script_1_0_block_0",
+      "opcode": "event_whenflagclicked",
+      "inputs": {},
+      "fields": {},
+      "next": "block4",
+      "parent": null,
+      "topLevel": true,
+      "x": 100,
+      "y": 100,
+      "shadow": false
+    },
+    {
+      "id": "script_1_0_block_1",
+      "opcode": "looks_sayforsecs",
+      "inputs": {
+        "MESSAGE": {
+          "type": "primitive",
+          "value": "Hello!",
+          "primitiveType": 1
+        },
+        "SECS": {
+          "type": "primitive",
+          "value": 2,
+          "primitiveType": 4
+        }
+      },
+      "fields": {},
+      "next": null,
+      "parent": "block3",
+      "topLevel": false,
+      "shadow": false
+    }
+  ]
+}

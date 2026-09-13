@@ -1,0 +1,38 @@
+{
+  "blocks": [
+    {
+      "id": "block1",
+      "semanticId": "script_0_0_block_0",
+      "opcode": "event_whenflagclicked",
+      "next": "block2",
+      "parent": null,
+      "inputs": {},
+      "fields": {},
+      "shadow": false,
+      "topLevel": true,
+      "x": 100,
+      "y": 100,
+      "contentHash": "8967a8a9f53698f5"
+    },
+    {
+      "id": "block2",
+      "semanticId": "script_0_0_block_1",
+      "opcode": "motion_movesteps",
+      "next": null,
+      "parent": "block1",
+      "inputs": {
+        "STEPS": [
+          1,
+          [
+            10
+          ]
+        ]
+      },
+      "fields": {},
+      "shadow": false,
+      "topLevel": false,
+      "contentHash": "12d2991c9139407e"
+    }
+  ],
+  "semanticId": "script_0_0"
+}

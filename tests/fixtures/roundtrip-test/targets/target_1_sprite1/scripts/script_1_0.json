@@ -1,0 +1,36 @@
+{
+  "blocks": [
+    {
+      "id": "block3",
+      "semanticId": "script_1_0_block_0",
+      "opcode": "event_whenflagclicked",
+      "next": "block4",
+      "parent": null,
+      "inputs": {},
+      "fields": {},
+      "shadow": false,
+      "topLevel": true,
+      "x": 100,
+      "y": 100,
+      "contentHash": "8967a8a9f53698f5"
+    },
+    {
+      "id": "block4",
+      "semanticId": "script_1_0_block_1",
+      "opcode": "control_forever",
+      "next": null,
+      "parent": "block3",
+      "inputs": {
+        "SUBSTACK": [
+          1,
+          "[BLOCK_REF]"
+        ]
+      },
+      "fields": {},
+      "shadow": false,
+      "topLevel": false,
+      "contentHash": "badc3cf73fc3e7f5"
+    }
+  ],
+  "semanticId": "script_1_0"
+}

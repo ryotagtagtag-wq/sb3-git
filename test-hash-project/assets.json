@@ -1,0 +1,32 @@
+{
+  "costumes": [
+    {
+      "name": "backdrop1",
+      "bitmapResolution": 1,
+      "dataFormat": "svg",
+      "assetId": "cd21514d0531fdffb22204e0ec5ed84a",
+      "md5ext": "cd21514d0531fdffb22204e0ec5ed84a.svg",
+      "rotationCenterX": 240,
+      "rotationCenterY": 180
+    },
+    {
+      "name": "costume1",
+      "bitmapResolution": 1,
+      "dataFormat": "svg",
+      "assetId": "f7a5c9b3d4e8f1a2b3c4d5e6f7a8b9c0",
+      "md5ext": "f7a5c9b3d4e8f1a2b3c4d5e6f7a8b9c0.svg",
+      "rotationCenterX": 48,
+      "rotationCenterY": 50
+    }
+  ],
+  "sounds": [
+    {
+      "name": "pop",
+      "dataFormat": "wav",
+      "assetId": "83c36d806dc92327b9e7e9c8f7a6b5c4",
+      "md5ext": "83c36d806dc92327b9e7e9c8f7a6b5c4.wav",
+      "rate": 44100,
+      "sampleCount": 256
+    }
+  ]
+}

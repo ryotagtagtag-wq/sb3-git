@@ -1,0 +1,8 @@
+{
+  "version": 1,
+  "meta": {
+    "semver": "3.0.0"
+  },
+  "extensions": [],
+  "monitors": []
+}

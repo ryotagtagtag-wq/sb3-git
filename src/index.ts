@@ -1,0 +1,10 @@
+// Main entry point for programmatic API
+export * from './codec/sb3.js'
+export * from './codec/normalize.js'
+export * from './codec/expand.js'
+export * from './algo/id-assign.js'
+export * from './algo/diff.js'
+export * from './algo/three-way-merge.js'
+export * from './render/diff-html.js'
+export * from './validate/schema.js'
+export * from './validate/integrity.js'

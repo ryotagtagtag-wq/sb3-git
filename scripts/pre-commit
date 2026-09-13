@@ -1,0 +1,30 @@
+#!/bin/bash
+# Pre-commit hook for SB3 files
+# Extracts SB3 to git-friendly format on commit
+
+set -e
+
+# Find staged SB3 files
+STAGED_SB3=$(git diff --cached --name-only --diff-filter=ACM | grep '\.sb3$' || true)
+
+if [ -z "$STAGED_SB3" ]; then
+  exit 0
+fi
+
+echo "Extracting SB3 files for git tracking..."
+
+for file in $STAGED_SB3; do
+  if [ -f "$file" ]; then
+    # Create .git/sb3-extracted directory
+    EXTRACT_DIR=".git/sb3-extracted/$(dirname "$file")"
+    mkdir -p "$EXTRACT_DIR"
+    
+    # Extract using sb3-git CLI
+    npx sb3-git import "$file" -o "$EXTRACT_DIR/$(basename "$file" .sb3)"
+    
+    # Stage the extracted files
+    git add "$EXTRACT_DIR"
+  fi
+done
+
+exit 0

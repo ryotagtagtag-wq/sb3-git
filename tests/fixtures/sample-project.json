@@ -1,0 +1,144 @@
+{
+  "targets": [
+    {
+      "name": "Stage",
+      "variables": {},
+      "lists": {},
+      "broadcasts": {},
+      "blocks": {
+        "block1": {
+          "opcode": "event_whenflagclicked",
+          "next": "block2",
+          "parent": null,
+          "inputs": {},
+          "fields": {},
+          "shadow": false,
+          "topLevel": true,
+          "x": 100,
+          "y": 100
+        },
+        "block2": {
+          "opcode": "motion_movesteps",
+          "next": null,
+          "parent": "block1",
+          "inputs": {
+            "STEPS": [1, [10]]
+          },
+          "fields": {},
+          "shadow": false,
+          "topLevel": false
+        }
+      },
+      "comments": {},
+      "costumes": [
+        {
+          "name": "backdrop1",
+          "bitmapResolution": 1,
+          "dataFormat": "png",
+          "assetId": "cd21514d0531fdffb22204e0ec5ed84a",
+          "md5ext": "cd21514d0531fdffb22204e0ec5ed84a.png",
+          "rotationCenterX": 240,
+          "rotationCenterY": 180
+        }
+      ],
+      "sounds": [],
+      "currentCostume": 0,
+      "volume": 100,
+      "layerOrder": 0,
+      "tempo": 60,
+      "videoTransparency": 50,
+      "videoState": "on",
+      "textToSpeechLanguage": null,
+      "x": 0,
+      "y": 0,
+      "size": 100,
+      "direction": 90,
+      "draggable": false,
+      "rotationStyle": "all around",
+      "visible": true
+    },
+    {
+      "name": "Sprite1",
+      "variables": {},
+      "lists": {},
+      "broadcasts": {},
+      "blocks": {
+        "block3": {
+          "opcode": "event_whenflagclicked",
+          "next": "block4",
+          "parent": null,
+          "inputs": {},
+          "fields": {},
+          "shadow": false,
+          "topLevel": true,
+          "x": 100,
+          "y": 100
+        },
+        "block4": {
+          "opcode": "control_forever",
+          "next": null,
+          "parent": "block3",
+          "inputs": {
+            "SUBSTACK": [1, {
+              "opcode": "motion_turnright",
+              "next": null,
+              "parent": "block4",
+              "inputs": {
+                "DEGREES": [1, [15]]
+              },
+              "fields": {},
+              "shadow": false,
+              "topLevel": false
+            }]
+          },
+          "fields": {},
+          "shadow": false,
+          "topLevel": false
+        }
+      },
+      "comments": {},
+      "costumes": [
+        {
+          "name": "costume1",
+          "bitmapResolution": 1,
+          "dataFormat": "svg",
+          "assetId": "a1b2c3d4e5f6789012345678901234ab",
+          "md5ext": "a1b2c3d4e5f6789012345678901234ab.svg",
+          "rotationCenterX": 48,
+          "rotationCenterY": 50
+        }
+      ],
+      "sounds": [
+        {
+          "name": "pop",
+          "dataFormat": "wav",
+          "assetId": "s1o2u3n4d5i6d789012345678901234ef",
+          "md5ext": "s1o2u3n4d5i6d789012345678901234ef.wav",
+          "rate": 44100,
+          "sampleCount": 2205
+        }
+      ],
+      "currentCostume": 0,
+      "volume": 100,
+      "layerOrder": 1,
+      "tempo": 60,
+      "videoTransparency": 50,
+      "videoState": "on",
+      "textToSpeechLanguage": null,
+      "x": 0,
+      "y": 0,
+      "size": 100,
+      "direction": 90,
+      "draggable": false,
+      "rotationStyle": "left-right",
+      "visible": true
+    }
+  ],
+  "monitors": [],
+  "extensions": [],
+  "meta": {
+    "semver": "3.0.0",
+    "vm": "0.2.0-prerelease.20240101",
+    "agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36"
+  }
+}

@@ -1,0 +1,170 @@
+name: CI
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main, develop]
+
+jobs:
+  validate:
+    name: Validate SB3
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+      
+      - name: Install dependencies
+        run: npm ci
+      
+      - name: Build
+        run: npm run build
+      
+      - name: Run tests
+        run: npm test
+      
+      - name: Validate SB3 files
+        run: |
+          # Find all .sb3 files in the repo
+          find . -name "*.sb3" -not -path "./node_modules/*" | while read file; do
+            echo "Validating $file"
+            npx sb3-git validate "$file"
+          done
+
+  deterministic-build:
+    name: Deterministic Build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+      
+      - name: Install dependencies
+        run: npm ci
+      
+      - name: Build
+        run: npm run build
+      
+      - name: Test deterministic export
+        run: |
+          # Test that export is deterministic by running twice and comparing
+          if [ -f "test/fixtures/sample-project.sb3" ]; then
+            npx sb3-git export test/fixtures/sample-project.sb3 /tmp/export1.sb3
+            npx sb3-git export test/fixtures/sample-project.sb3 /tmp/export2.sb3
+            if cmp -s /tmp/export1.sb3 /tmp/export2.sb3; then
+              echo "✓ Deterministic export verified"
+            else
+              echo "✗ Export is not deterministic!"
+              exit 1
+            fi
+          fi
+
+  diff-report:
+    name: Diff Report
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+      
+      - name: Install dependencies
+        run: npm ci
+      
+      - name: Build
+        run: npm run build
+      
+      - name: Generate diff report for changed SB3 files
+        run: |
+          # Find changed .sb3 files in PR
+          CHANGED_SB3=$(git diff --name-only origin/${{ github.base_ref }}...HEAD | grep '\.sb3$' || true)
+          
+          if [ -z "$CHANGED_SB3" ]; then
+            echo "No SB3 files changed in this PR"
+            exit 0
+          fi
+          
+          for file in $CHANGED_SB3; do
+            if [ -f "$file" ]; then
+              echo "Generating diff report for $file"
+              # Get base version
+              git show origin/${{ github.base_ref }}:"$file" > /tmp/base.sb3 2>/dev/null || continue
+              # Generate HTML diff report
+              npx sb3-git diff /tmp/base.sb3 "$file" --output /tmp/diff-report.html
+              # Upload as artifact
+              echo "diff-report-$file.html" >> $GITHUB_OUTPUT
+            fi
+          done
+        id: diff-reports
+      
+      - name: Upload diff reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: sb3-diff-reports
+          path: /tmp/diff-report*.html
+          retention-days: 7
+
+  merge-test:
+    name: Three-way Merge Test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+      
+      - name: Install dependencies
+        run: npm ci
+      
+      - name: Build
+        run: npm run build
+      
+      - name: Test three-way merge
+        run: |
+          # Create test scenario: base, ours, theirs
+          # This is a smoke test for the merge functionality
+          echo "Testing three-way merge..."
+          node -e "
+            const { threeWayMerge } = await import('./dist/algo/merge.js');
+            const { assignSemanticIds } = await import('./dist/algo/id-assign.js');
+            const { SB3Codec } = await import('./dist/codec/sb3.js');
+            const fs = await import('fs');
+            
+            // Load test fixture
+            const buffer = fs.readFileSync('test/fixtures/sample-project.sb3');
+            const expanded = SB3Codec.expand(buffer);
+            const { project } = assignSemanticIds(expanded.project);
+            
+            // Simulate ours and theirs with minor changes
+            const ours = JSON.parse(JSON.stringify(project));
+            const theirs = JSON.parse(JSON.stringify(project));
+            
+            // Make different changes
+            ours.targets[0].isStage = false;
+            theirs.targets[0].name = 'Modified Sprite';
+            
+            const { project: merged, conflicts } = threeWayMerge(project, ours, theirs);
+            console.log('Merge conflicts:', conflicts.length);
+            console.log('✓ Three-way merge works');
+          "

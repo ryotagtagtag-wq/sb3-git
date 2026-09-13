@@ -1,0 +1,34 @@
+{
+  "id": "script_0_0",
+  "parentTarget": "Stage",
+  "blocks": [
+    {
+      "id": "script_0_0_block_0",
+      "opcode": "event_whenflagclicked",
+      "inputs": {},
+      "fields": {},
+      "next": "block2",
+      "parent": null,
+      "topLevel": true,
+      "x": 100,
+      "y": 100,
+      "shadow": false
+    },
+    {
+      "id": "script_0_0_block_1",
+      "opcode": "motion_movesteps",
+      "inputs": {
+        "STEPS": {
+          "type": "primitive",
+          "value": 10,
+          "primitiveType": 4
+        }
+      },
+      "fields": {},
+      "next": null,
+      "parent": "block1",
+      "topLevel": false,
+      "shadow": false
+    }
+  ]
+}
