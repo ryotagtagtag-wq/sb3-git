@@ -179,13 +179,17 @@ function computeBlockContentHash(block: SB3Block): string {
     hash.update(String(input[0]))
     // Don't hash block references for content hash
     if (typeof input[1] !== 'object' || input[1] === null || Array.isArray(input[1])) {
-      hash.update(JSON.stringify(input[1]))
+      // Handle null/undefined values
+      const val = input[1] ?? ''
+      hash.update(JSON.stringify(val))
     }
   }
   for (const [key, field] of Object.entries(block.fields).sort()) {
     hash.update(key)
     hash.update(field[0])
-    hash.update(field[1])
+    // Handle null/undefined field values
+    const fieldVal = field[1] ?? ''
+    hash.update(fieldVal)
   }
   hash.update(String(block.shadow))
   return hash.digest('hex').slice(0, 16)

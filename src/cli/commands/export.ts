@@ -2,7 +2,7 @@
 import { Command } from 'commander'
 import { readFile } from 'node:fs/promises'
 import { join } from 'node:path'
-import { collapseFromFiles, collectAssetsFromFiles } from '../../codec/expand.js'
+import { collapseFromFiles, collectAssetsFromFiles, intermediateToSB3 } from '../../codec/expand.js'
 import { exportSB3 } from '../../codec/sb3.js'
 import { writeFile } from 'node:fs/promises'
 
@@ -16,10 +16,13 @@ export const exportCommand = new Command('export')
     const project = await collapseFromFiles(input)
     console.log(`  Collapsed project: ${project.targets.length} targets`)
     
+    // Convert intermediate format to SB3 format (with blocks)
+    const sb3Project = intermediateToSB3(project)
+    
     const assets = await collectAssetsFromFiles(input)
     console.log(`  Collected ${assets.size} assets`)
     
-    const buffer = await exportSB3(project as any, assets)
+    const buffer = await exportSB3(sb3Project, assets)
     await writeFile(output, buffer)
     console.log(`✓ Export complete: ${output}`)
   })

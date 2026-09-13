@@ -2,7 +2,34 @@
 import { readFile, writeFile, mkdir, rm } from 'node:fs/promises'
 import { join, dirname } from 'node:path'
 import { fileURLToPath } from 'node:url'
-import type { IntermediateProject, IntermediateTarget, IntermediateScript, IntermediateBlock, IntermediateComment, IntermediateCostume, IntermediateSound, ExpandedProject } from './types.js'
+import type { 
+  IntermediateProject, 
+  IntermediateTarget, 
+  IntermediateScript, 
+  IntermediateBlock, 
+  IntermediateComment, 
+  IntermediateCostume, 
+  IntermediateSound, 
+  IntermediateMonitor,
+  IntermediateExtension,
+  IntermediateMeta,
+  IntermediateInput,
+  IntermediateInputValue,
+  ExpandedProject 
+} from './types.js'
+import type { 
+  SB3Project, 
+  SB3Target, 
+  SB3Block, 
+  SB3Input, 
+  SB3Field, 
+  SB3Comment, 
+  SB3Costume, 
+  SB3Sound, 
+  SB3Monitor, 
+  SB3Extension, 
+  SB3Meta 
+} from './types.js'
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
 
@@ -197,4 +224,151 @@ export async function collectAssetsFromFiles(inputDir: string): Promise<Map<stri
   }
   
   return assets
+}
+
+// Convert IntermediateProject back to SB3Project format (with blocks instead of scripts)
+// Using type assertions to bypass strict type checking for conversion
+export function intermediateToSB3(project: IntermediateProject): SB3Project {
+  return {
+    targets: project.targets.map(target => intermediateTargetToSB3(target) as any),
+    monitors: project.monitors.map(intermediateMonitorToSB3 as any),
+    extensions: project.extensions.map(intermediateExtensionToSB3 as any),
+    meta: intermediateMetaToSB3(project.meta) as any
+  }
+}
+
+function intermediateTargetToSB3(target: IntermediateTarget): any {
+  // Flatten scripts back to blocks
+  const blocks: Record<string, any> = {}
+  
+  for (const script of target.scripts) {
+    for (let i = 0; i < script.blocks.length; i++) {
+      const block = script.blocks[i]
+      if (!block) continue
+      const blockId = block.id
+      const nextBlock = script.blocks[i + 1]
+      
+      blocks[blockId] = {
+        opcode: block.opcode,
+        next: nextBlock ? nextBlock.id : null,
+        parent: block.parent,
+        inputs: intermediateInputsToSB3(block.inputs),
+        fields: Object.fromEntries(
+          Object.entries(block.fields).map(([k, v]) => [k, [v[0], v[1]]])
+        ),
+        shadow: block.shadow,
+        topLevel: i === 0,
+        x: block.x,
+        y: block.y
+      }
+    }
+  }
+  
+  return {
+    name: target.name,
+    variables: Object.fromEntries(
+      Object.entries(target.variables).map(([k, v]) => [k, [v[0], v[1]]])
+    ),
+    lists: Object.fromEntries(
+      Object.entries(target.lists).map(([k, v]) => [k, [v[0], v[1]]])
+    ),
+    broadcasts: Object.fromEntries(
+      Object.entries(target.broadcasts).map(([k, v]) => [k, v])
+    ),
+    blocks,
+    comments: Object.fromEntries(
+      target.comments.map(c => [c.id, {
+        blockId: c.blockSemanticId,
+        x: c.x,
+        y: c.y,
+        width: c.width,
+        height: c.height,
+        minimized: c.minimized,
+        text: c.text
+      }])
+    ),
+    costumes: target.costumes.map(c => ({
+      name: c.name,
+      bitmapResolution: c.bitmapResolution,
+      dataFormat: c.dataFormat,
+      assetId: c.assetId,
+      md5ext: c.md5ext,
+      rotationCenterX: c.rotationCenterX,
+      rotationCenterY: c.rotationCenterY
+    })),
+    sounds: target.sounds.map(s => ({
+      name: s.name,
+      dataFormat: s.dataFormat,
+      assetId: s.assetId,
+      md5ext: s.md5ext,
+      rate: s.rate,
+      sampleCount: s.sampleCount
+    })),
+    currentCostume: target.currentCostume,
+    volume: target.volume,
+    layerOrder: target.layerOrder,
+    tempo: target.tempo,
+    videoTransparency: target.videoTransparency,
+    videoState: target.videoState,
+    textToSpeechLanguage: target.textToSpeechLanguage,
+    x: target.x,
+    y: target.y,
+    size: target.size,
+    direction: target.direction,
+    draggable: target.draggable,
+    rotationStyle: target.rotationStyle,
+    visible: target.visible
+  }
+}
+
+function intermediateInputsToSB3(inputs: Record<string, IntermediateInput>): Record<string, any> {
+  const result: Record<string, any> = {}
+  for (const [key, value] of Object.entries(inputs)) {
+    result[key] = [value[0], intermediateInputValueToSB3(value[1])]
+  }
+  return result
+}
+
+function intermediateInputValueToSB3(value: IntermediateInputValue): any {
+  if (Array.isArray(value)) {
+    return value.map(intermediateInputValueToSB3)
+  }
+  if (typeof value === 'object' && value !== null) {
+    return value
+  }
+  return value
+}
+
+function intermediateMonitorToSB3(monitor: IntermediateMonitor): any {
+  return {
+    id: monitor.id,
+    mode: monitor.mode,
+    opcode: monitor.opcode,
+    params: monitor.params,
+    spriteName: monitor.spriteName,
+    value: monitor.value,
+    width: monitor.width,
+    height: monitor.height,
+    x: monitor.x,
+    y: monitor.y,
+    visible: monitor.visible,
+    sliderMin: monitor.sliderMin,
+    sliderMax: monitor.sliderMax,
+    isDiscrete: monitor.isDiscrete
+  }
+}
+
+function intermediateExtensionToSB3(ext: IntermediateExtension): any {
+  return {
+    name: ext.name,
+    version: ext.version
+  }
+}
+
+function intermediateMetaToSB3(meta: IntermediateMeta): any {
+  return {
+    semver: meta.semver,
+    vm: meta.vm,
+    agent: meta.agent
+  }
 }
